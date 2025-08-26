@@ -20,7 +20,8 @@ export default (mainWindow) => {
     }
 
     mainWindow.show()
-
+  
+    // 确保托盘被正确销毁
     if (tray) {
       tray.destroy()
       tray = null
@@ -58,21 +59,50 @@ export default (mainWindow) => {
     }
     else if (response === 1) {
       hideApp()
-
+  
+      // 如果托盘已经存在，则不重新创建
+      if (tray) {
+        return true
+      }
+  
       tray = new Tray(trayPath)
-
+  
       tray.setToolTip('escrcpy')
-
+  
       tray.on('click', () => {
         showApp()
       })
-
+  
       const contextMenu = Menu.buildFromTemplate([
         {
           label: await t('common.open'),
           click: () => {
             showApp()
           },
+        },
+        {
+          type: 'separator',
+        },
+        {
+          label: await t('device.control.turnScreenOff'),
+          click: async () => {
+            const { webContents } = mainWindow
+            if (webContents) {
+              webContents.send('tray:turn-screen-off')
+            }
+          },
+        },
+        {
+          label: await t('device.control.file.name'),
+          click: async () => {
+            const { webContents } = mainWindow
+            if (webContents) {
+              webContents.send('tray:open-file-manage')
+            }
+          },
+        },
+        {
+          type: 'separator',
         },
         {
           label: await t('common.restart'),
@@ -88,9 +118,9 @@ export default (mainWindow) => {
           },
         },
       ])
-
+  
       tray.setContextMenu(contextMenu)
-
+  
       return true
     }
 
