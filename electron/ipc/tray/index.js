@@ -75,6 +75,30 @@ export default (mainWindow) => {
           },
         },
         {
+          type: 'separator',
+        },
+        {
+          label: await t('device.control.turnScreenOff'),
+          click: async () => {
+            const { webContents } = mainWindow
+            if (webContents) {
+              webContents.send('tray:turn-screen-off')
+            }
+          },
+        },
+        {
+          label: await t('device.control.file.name'),
+          click: async () => {
+            const { webContents } = mainWindow
+            if (webContents) {
+              webContents.send('tray:open-file-manage')
+            }
+          },
+        },
+        {
+          type: 'separator',
+        },
+        {
           label: await t('common.restart'),
           click: () => {
             app.relaunch()
