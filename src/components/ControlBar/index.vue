@@ -1,10 +1,12 @@
 <template>
   <div
-    class="bg-primary-100 dark:bg-gray-800 flex items-center group h-7 lg:h-9 overflow-hidden"
+    class="flex items-center group h-7 lg:h-9 overflow-hidden"
+    :class="floating ? 'bg-gray-800 dark:bg-gray-800' : 'bg-primary-100 dark:bg-gray-800'"
   >
     <el-button
       type="primary"
       class="el-button-nav"
+      :class="floating ? 'text-white' : ''"
       title="Prev"
       @click="handlePrev"
     >
@@ -40,7 +42,10 @@
                 type="primary"
                 plain
                 class="!border-none !mx-0 bg-transparent !rounded-0"
-                :class="['unauthorized', 'offline'].includes(device.status) ? '!bg-transparent' : ''"
+                :class="[
+                  ['unauthorized', 'offline'].includes(device.status) ? '!bg-transparent' : '',
+                  floating ? 'text-white' : ''
+                ]"
                 :disabled="['unauthorized', 'offline'].includes(device.status)"
                 :title="$t(item.tips || item.label)"
                 :loading="loading"
@@ -67,6 +72,7 @@
     <el-button
       type="primary"
       class="el-button-nav"
+      :class="floating ? 'text-white' : ''"
       title="Next"
       @click="handleNext"
     >

@@ -251,6 +251,7 @@
     "useResizeObserver": true,
     "useRoute": true,
     "useRouter": true,
+    "useScaleScreen": true,
     "useScreenOrientation": true,
     "useScreenSafeArea": true,
     "useScreenshotAction": true,
@@ -321,9 +322,8 @@
     "watchTriggerable": true,
     "watchWithFilter": true,
     "whenever": true,
-    "ElMessage": true,
-    "ElMessageBox": true,
     "ElLoading": true,
-    "useScaleScreen": true
+    "ElMessage": true,
+    "ElMessageBox": true
   }
 }
