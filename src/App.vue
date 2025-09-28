@@ -6,12 +6,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { i18n } from '$/locales/index.js'
 import localeModel from '$/plugins/element-plus/locale.js'
 import FileDialog from '$/components/ControlBar/FileManage/FileDialog/index.vue'
 import { useDeviceStore } from '$/store/device/index.js'
 import { useStartApp } from '$/hooks/useStartApp/index.js'
+import { usePreferenceStore } from '$/store/preference/index.js'
+import { openFloatControl } from '$/utils/device/index.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 import Layouts from './layouts/index.vue'
@@ -31,7 +33,7 @@ window.electron.ipcRenderer.on('tray:turn-screen-off', async () => {
   try {
     const devices = await deviceStore.getList()
     console.log('Devices found:', devices)
-    
+
     if (devices.length > 0) {
       const activeDevice = devices.find(device => device.status === 'device') || devices[0]
       console.log('Active device:', activeDevice)
@@ -41,13 +43,15 @@ window.electron.ipcRenderer.on('tray:turn-screen-off', async () => {
         console.log('Turn screen off command executed')
         ElMessage.success('屏幕已关闭')
       }
-    } else {
+    }
+    else {
       console.log('No devices found')
       ElMessage.warning('未找到连接的设备')
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error in tray:turn-screen-off handler:', error)
-    ElMessage.error('关闭屏幕失败: ' + error.message)
+    ElMessage.error(`关闭屏幕失败: ${error.message}`)
   }
 })
 
@@ -56,10 +60,10 @@ window.electron.ipcRenderer.on('tray:open-file-manage', async () => {
   try {
     // 确保主窗口可见
     window.electron.ipcRenderer.send('show-main-window')
-    
+
     const devices = await deviceStore.getList()
     console.log('Devices found:', devices)
-    
+
     if (devices.length > 0) {
       const activeDevice = devices.find(device => device.status === 'device') || devices[0]
       console.log('Active device:', activeDevice)
@@ -68,13 +72,56 @@ window.electron.ipcRenderer.on('tray:open-file-manage', async () => {
         fileDialogRef.value.open(activeDevice)
         ElMessage.success('文件管理已打开')
       }
-    } else {
+    }
+    else {
       console.log('No devices found')
       ElMessage.warning('未找到连接的设备')
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error in tray:open-file-manage handler:', error)
-    ElMessage.error('打开文件管理失败: ' + error.message)
+    ElMessage.error(`打开文件管理失败: ${error.message}`)
+  }
+})
+
+window.electron.ipcRenderer.on('tray:start-mirror', async () => {
+  console.log('Received tray:start-mirror event')
+  try {
+    const devices = await deviceStore.getList()
+    console.log('Devices found:', devices)
+
+    if (devices.length > 0) {
+      const activeDevice = devices.find(device => device.status === 'device') || devices[0]
+      console.log('Active device:', activeDevice)
+      if (activeDevice) {
+        console.log('Starting mirror for device:', activeDevice.id)
+
+        // 使用与 MirrorAction 组件相同的镜像逻辑
+        const preferenceStore = usePreferenceStore()
+        const args = preferenceStore.scrcpyParameter(activeDevice.id, {
+          excludes: ['--otg', '--mouse=aoa', '--keyboard=aoa'],
+        })
+
+        // 开始镜像
+        await window.scrcpy.mirror(activeDevice.id, {
+          title: deviceStore.getLabel(activeDevice.id, 'mirror'),
+          args,
+        })
+
+        // 打开悬浮控制窗口
+        openFloatControl(activeDevice)
+
+        ElMessage.success('镜像已开始')
+      }
+    }
+    else {
+      console.log('No devices found')
+      ElMessage.warning('未找到连接的设备')
+    }
+  }
+  catch (error) {
+    console.error('Error in tray:start-mirror handler:', error)
+    ElMessage.error(`开始镜像失败: ${error.message}`)
   }
 })
 

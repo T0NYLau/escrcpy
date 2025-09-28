@@ -96,6 +96,15 @@ export default (mainWindow) => {
           },
         },
         {
+          label: await t('device.mirror.start'),
+          click: async () => {
+            const { webContents } = mainWindow
+            if (webContents) {
+              webContents.send('tray:start-mirror')
+            }
+          },
+        },
+        {
           label: await t('device.control.file.name'),
           click: async () => {
             const { webContents } = mainWindow
@@ -161,6 +170,6 @@ export default (mainWindow) => {
 
   // 返回销毁托盘图标的函数，供外部使用
   return {
-    destroyTray
+    destroyTray,
   }
 }

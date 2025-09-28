@@ -12,7 +12,7 @@ export default (mainWindow) => {
   const trayApi = tray(mainWindow)
   theme(mainWindow)
   shortcuts(mainWindow)
-  
+
   // 将托盘API挂载到mainWindow上，供其他模块使用
   if (trayApi) {
     mainWindow._trayApi = trayApi

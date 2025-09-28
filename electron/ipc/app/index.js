@@ -30,7 +30,7 @@ export default (mainWindow) => {
       }
       mainWindow.show()
       mainWindow.focus()
-      
+
       // 销毁托盘图标，保持与showApp()逻辑一致
       // 避免通过文件管理等功能显示窗口时托盘图标重复创建
       if (mainWindow._trayApi && mainWindow._trayApi.destroyTray) {

@@ -44,7 +44,7 @@
                 class="!border-none !mx-0 bg-transparent !rounded-0"
                 :class="[
                   ['unauthorized', 'offline'].includes(device.status) ? '!bg-transparent' : '',
-                  floating ? 'text-white' : ''
+                  floating ? 'text-white' : '',
                 ]"
                 :disabled="['unauthorized', 'offline'].includes(device.status)"
                 :title="$t(item.tips || item.label)"
