@@ -12,7 +12,16 @@ export default (mainWindow) => {
 
   eventEmitter.on('tray:destroy', () => {
     tray?.destroy?.()
+    tray = null
   })
+
+  // 提供销毁托盘图标的函数，供外部调用
+  const destroyTray = () => {
+    if (tray) {
+      tray.destroy()
+      tray = null
+    }
+  }
 
   const showApp = () => {
     if (process.platform === 'darwin') {
@@ -149,4 +158,9 @@ export default (mainWindow) => {
 
     closeApp(appCloseCode)
   })
+
+  // 返回销毁托盘图标的函数，供外部使用
+  return {
+    destroyTray
+  }
 }

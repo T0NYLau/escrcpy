@@ -9,7 +9,12 @@ export default (mainWindow) => {
   appEvents(mainWindow)
   handles(mainWindow)
   updater(mainWindow)
-  tray(mainWindow)
+  const trayApi = tray(mainWindow)
   theme(mainWindow)
   shortcuts(mainWindow)
+  
+  // 将托盘API挂载到mainWindow上，供其他模块使用
+  if (trayApi) {
+    mainWindow._trayApi = trayApi
+  }
 }
