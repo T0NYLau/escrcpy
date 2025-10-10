@@ -17,6 +17,7 @@ git clone https://github.com/viarotel-org/escrcpy.git
 cd escrcpy
 
 # Enable pnpm package manager
+npm install -g pnpm
 corepack enable pnpm
 
 # Install dependencies
@@ -30,8 +31,15 @@ pnpm build          # Auto-detect platform
 pnpm build:win      # Build for Windows
 pnpm build:mac      # Build for macOS 
 pnpm build:linux    # Build for Linux
+pnpm build:win -- --win nsis # 只生成setup.exe文件
 ```
-
+## npm命令
+```shell
+npm install # 安装依赖
+npm run dev # 开放模式试用
+npm run build # 构建所有应用
+npm run build:win -- --win nsis # 只生成setup.exe文件
+```
 ## Technical Architecture
 
 ### Core Technologies
