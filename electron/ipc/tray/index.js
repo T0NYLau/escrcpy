@@ -9,9 +9,13 @@ export default (mainWindow) => {
   const t = value => executeI18n(mainWindow, value)
 
   let tray = null
+  let isTrayCreating = false  // 防止重复创建托盘图标的标志
 
   eventEmitter.on('tray:destroy', () => {
-    tray?.destroy?.()
+    if (tray && !isTrayCreating) {
+      tray.destroy()
+      tray = null
+    }
   })
 
   const showApp = () => {
@@ -21,7 +25,7 @@ export default (mainWindow) => {
 
     mainWindow.show()
 
-    if (tray) {
+    if (tray && !isTrayCreating) {
       tray.destroy()
       tray = null
     }
@@ -59,37 +63,77 @@ export default (mainWindow) => {
     else if (response === 1) {
       hideApp()
 
-      tray = new Tray(trayPath)
+      // 防止重复创建托盘图标
+      if (isTrayCreating) {
+        return true
+      }
 
-      tray.setToolTip('escrcpy')
+      // 如果托盘图标已存在，直接返回
+      if (tray) {
+        return true
+      }
 
-      tray.on('click', () => {
-        showApp()
-      })
+      isTrayCreating = true
 
-      const contextMenu = Menu.buildFromTemplate([
-        {
-          label: await t('common.open'),
-          click: () => {
-            showApp()
+      try {
+        tray = new Tray(trayPath)
+
+        tray.setToolTip('escrcpy')
+
+        tray.on('click', () => {
+          showApp()
+        })
+
+        const contextMenu = Menu.buildFromTemplate([
+          {
+            label: await t('common.open'),
+            click: () => {
+              showApp()
+            },
           },
-        },
-        {
-          label: await t('common.restart'),
-          click: () => {
-            app.relaunch()
-            quitApp()
+          {
+            type: 'separator',
           },
-        },
-        {
-          label: await t('appClose.quit'),
-          click: () => {
-            quitApp()
+          {
+            label: await t('device.mirror.start'),
+            click: () => {
+              mainWindow.webContents.send('tray:start-mirror')
+            },
           },
-        },
-      ])
+          {
+            label: await t('device.control.turnScreenOff'),
+            click: () => {
+              mainWindow.webContents.send('tray:turn-screen-off')
+            },
+          },
+          {
+            label: await t('device.control.file.name'),
+            click: () => {
+              mainWindow.webContents.send('tray:open-file-manage')
+            },
+          },
+          {
+            type: 'separator',
+          },
+          {
+            label: await t('common.restart'),
+            click: () => {
+              app.relaunch()
+              quitApp()
+            },
+          },
+          {
+            label: await t('appClose.quit'),
+            click: () => {
+              quitApp()
+            },
+          },
+        ])
 
-      tray.setContextMenu(contextMenu)
+        tray.setContextMenu(contextMenu)
+      } finally {
+        isTrayCreating = false
+      }
 
       return true
     }

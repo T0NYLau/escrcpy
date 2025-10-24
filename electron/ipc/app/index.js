@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 
-export default () => {
+export default (mainWindow) => {
   ipcMain.on('restart-app', () => {
     app.isQuiting = true
     app.relaunch()
@@ -20,6 +20,16 @@ export default () => {
 
     if (win) {
       win.hide()
+    }
+  })
+
+  ipcMain.on('show-main-window', (event) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore()
+      }
+      mainWindow.show()
+      mainWindow.focus()
     }
   })
 }
