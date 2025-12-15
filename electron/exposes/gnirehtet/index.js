@@ -1,5 +1,4 @@
 import { spawn } from 'node:child_process'
-import { electronAPI } from '@electron-toolkit/preload'
 
 import {
   adbPath,
@@ -16,9 +15,7 @@ const appDebug = appStore.get('common.debug') || false
 
 const processManager = new ProcessManager()
 
-electronAPI.ipcRenderer.on('quit-before', async () => {
-  processManager.kill()
-})
+// 监听退出事件将在主进程中设置
 
 async function shell(command, { debug = false, stdout, stderr } = {}) {
   const spawnPath = appStore.get('common.gnirehtetPath') || gnirehtetPath

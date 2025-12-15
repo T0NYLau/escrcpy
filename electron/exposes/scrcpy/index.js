@@ -1,6 +1,5 @@
 import { exec as _exec, spawn } from 'node:child_process'
 import util from 'node:util'
-import { electronAPI } from '@electron-toolkit/preload'
 import { adbPath, scrcpyPath } from '$electron/configs/index.js'
 import appStore from '$electron/helpers/store.js'
 import commandHelper from '$renderer/utils/command/index.js'
@@ -13,9 +12,7 @@ const exec = util.promisify(_exec)
 
 const processManager = new ProcessManager()
 
-electronAPI.ipcRenderer.on('quit-before', () => {
-  processManager.kill()
-})
+// 监听退出事件将在主进程中设置
 
 async function shell(command, { stdout, stderr, signal, ...options } = {}) {
   const spawnPath = appStore.get('common.scrcpyPath') || scrcpyPath

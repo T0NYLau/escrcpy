@@ -11,7 +11,6 @@ import { parseBatteryDump } from './helpers/battery/index.js'
 import { ADBDownloader } from './helpers/downloader/index.js'
 import adbScanner from './helpers/scanner/index.js'
 import { ADBUploader } from './helpers/uploader/index.js'
-import { electronAPI } from '@electron-toolkit/preload'
 import { readDirWithStat } from './helpers/explorer/index.js'
 
 const exec = util.promisify(_exec)
@@ -20,10 +19,7 @@ const processManager = new ProcessManager()
 
 let client = null
 
-electronAPI.ipcRenderer.on('quit-before', () => {
-  client?.kill?.()
-  processManager.kill()
-})
+// 监听退出事件将在主进程中设置
 
 appStore.onDidChange('common.adbPath', async (value, oldValue) => {
   if (value === oldValue) {

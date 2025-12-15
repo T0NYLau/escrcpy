@@ -18,9 +18,29 @@ window.electron.ipcRenderer.on('quit-before', async () => {
 })
 
 const startApp = useStartApp()
+const deviceStore = useDeviceStore()
+const preferenceStore = usePreferenceStore()
 
 window.electron.ipcRenderer.on('execute-arguments-change', async (event, params) => {
   startApp.open(params)
+})
+
+window.electron.ipcRenderer.on('tray-start-mirror', async (event, device) => {
+  try {
+    const args = preferenceStore.scrcpyParameter(device.id, {
+      excludes: ['--otg', '--mouse=aoa', '--keyboard=aoa'],
+    })
+
+    const mirroring = window.scrcpy.mirror(device.id, {
+      title: deviceStore.getLabel(device, 'mirror'),
+      args,
+    })
+
+    await mirroring
+  } catch (error) {
+    console.error('Failed to start mirror from tray:', error)
+    ElMessage.error(window.t('device.mirror.startFailed'))
+  }
 })
 
 onMounted(() => {

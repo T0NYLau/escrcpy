@@ -4,11 +4,15 @@ import { executeI18n } from '$electron/helpers/index.js'
 import appStore from '$electron/helpers/store.js'
 import { eventEmitter } from '$electron/helpers/emitter.js'
 import { sleep } from '$/utils'
+import adb from '$electron/exposes/adb/index.js'
 
 export default (mainWindow) => {
   const t = value => executeI18n(mainWindow, value)
 
   let tray = null
+
+  // 初始化adb模块
+  adb.init()
 
   eventEmitter.on('tray:destroy', () => {
     tray?.destroy?.()
@@ -51,6 +55,25 @@ export default (mainWindow) => {
     return true
   }
 
+  const getConnectedDevices = async () => {
+    try {
+      const devices = await adb.getDeviceList() || []
+      return devices.filter(device => device.type === 'device')
+    } catch (error) {
+      console.error('Failed to get device list:', error)
+      return []
+    }
+  }
+
+  const startMirror = async (device) => {
+    try {
+      mainWindow.webContents.send('tray-start-mirror', device)
+      // 不显示主界面，只在后台启动镜像
+    } catch (error) {
+      console.error('Failed to start mirror:', error)
+    }
+  }
+
   const closeApp = async (response) => {
     if (response === 0) {
       quitApp()
@@ -73,6 +96,48 @@ export default (mainWindow) => {
           click: () => {
             showApp()
           },
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: await t('device.mirror.start'),
+          click: async () => {
+            const devices = await getConnectedDevices()
+            if (devices.length === 0) {
+              dialog.showMessageBox({
+                type: 'info',
+                title: await t('common.tips'),
+                message: await t('device.mirror.noDevice'),
+                buttons: [await t('common.confirm')]
+              })
+              return
+            }
+            
+            if (devices.length === 1) {
+              await startMirror(devices[0])
+            } else {
+              const deviceChoices = devices.map(device => ({
+                label: `${device.id} (${device.product || device.name})`,
+                value: device
+              }))
+              
+              const { response } = await dialog.showMessageBox({
+                type: 'question',
+                title: await t('device.mirror.selectDevice'),
+                message: await t('device.mirror.multipleDevices'),
+                buttons: deviceChoices.map(choice => choice.label),
+                defaultId: 0
+              })
+              
+              if (response >= 0 && response < devices.length) {
+                await startMirror(devices[response])
+              }
+            }
+          }
+        },
+        {
+          type: 'separator'
         },
         {
           label: await t('common.restart'),
